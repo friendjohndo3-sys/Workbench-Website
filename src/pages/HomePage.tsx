@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { WORKBENCH_ASSETS } from '../assets/workbenchImages';
+import { useContent } from '../context/ContentContext';
 import {
   Download,
   ArrowRight,
@@ -9,17 +9,13 @@ import {
   Terminal,
   FileCode,
   Zap,
-  FolderTree,
-  Package,
-  Activity,
-  Film,
-  Volume2,
-  CheckCircle2,
   Compass,
-  Workflow
 } from 'lucide-react';
 
 export const HomePage: React.FC = () => {
+  const { content } = useContent();
+  const hp = content.homepage;
+
   return (
     <div className="pt-16 bg-white">
       {/* 1. Hero Section */}
@@ -28,43 +24,39 @@ export const HomePage: React.FC = () => {
           <div className="text-center max-w-4xl mx-auto space-y-6">
             {/* Technical Metadata Header */}
             <div className="flex items-center justify-center gap-3 text-xs text-neutral-500 font-mono tracking-wider uppercase">
-              <span className="text-[#0e3052] font-semibold">Standalone Game Engine</span>
-              <span aria-hidden="true" className="text-neutral-300">/</span>
-              <span>2D &amp; 3D Runtime</span>
-              <span aria-hidden="true" className="text-neutral-300">/</span>
-              <span>Desktop &amp; Mobile</span>
+              <span className="text-[#0e3052] font-semibold">{hp.heroTagline || 'Standalone Game Engine'}</span>
             </div>
 
             {/* Primary Tagline */}
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-neutral-900 leading-[1.08] text-balance font-sans">
-              Build. Create. Play.
+              {hp.heroHeadline || 'Build. Create. Play.'}
             </h1>
 
             {/* Supporting Text */}
             <p className="text-lg sm:text-xl text-neutral-600 max-w-2xl mx-auto leading-relaxed text-balance font-normal font-sans">
-              A game engine built for bringing your ideas to life.
+              {hp.heroSupportingText || 'A game engine built for bringing your ideas to life.'}
             </p>
 
             {/* Primary Action Buttons */}
             <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
-                to="/download"
+                to={hp.primaryButtonPath || '/download'}
                 className="btn-blueprint w-full sm:w-auto px-7 py-3.5 text-sm font-semibold tracking-wide flex items-center justify-center gap-2.5 cursor-pointer shadow-sm font-sans"
               >
                 <Download className="w-4 h-4" />
-                <span>Download Workbench</span>
+                <span>{hp.primaryButtonText || 'Download Workbench'}</span>
               </Link>
 
               <Link
-                to="/features"
+                to={hp.secondaryButtonPath || '/features'}
                 className="btn-blueprint-secondary w-full sm:w-auto px-7 py-3.5 text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer font-sans"
               >
                 <Compass className="w-4 h-4 text-neutral-500" />
-                <span>Explore Features</span>
+                <span>{hp.secondaryButtonText || 'Explore Features'}</span>
               </Link>
             </div>
 
-            {/* Core Subsystem Pill Indicators */}
+            {/* Core Subsystem Indicators */}
             <div className="pt-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-neutral-600 font-mono">
               <span className="flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#0e3052]" />
@@ -85,12 +77,12 @@ export const HomePage: React.FC = () => {
             </div>
           </div>
 
-          {/* Main Hero Display Banner (1791001622925.jpg) */}
+          {/* Main Hero Display Banner */}
           <div className="mt-12 lg:mt-16 max-w-5xl mx-auto">
             <div className="relative rounded-lg overflow-hidden border border-neutral-300 shadow-sm bg-neutral-900">
               <img
-                src={WORKBENCH_ASSETS.HERO_DISPLAY}
-                alt="Workbench — Build. Create. Play. official display banner"
+                src={hp.heroDisplayImage || '/images/1791001622925.jpg'}
+                alt="Workbench official display banner"
                 className="w-full h-auto max-h-[600px] object-cover object-center block select-none"
                 loading="eager"
               />
@@ -108,10 +100,10 @@ export const HomePage: React.FC = () => {
               Core Architecture
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-neutral-900 mb-3 font-sans">
-              Engineered with precision. Versatile by design.
+              {hp.featureSectionTitle || 'Engineered with precision. Versatile by design.'}
             </h2>
             <p className="text-base text-neutral-600 leading-relaxed font-sans">
-              Workbench combines a high-performance native core with multi-language flexibility, giving creators complete freedom across dimensions and workflows.
+              {hp.featureSectionDescription || 'Workbench combines a high-performance native core with multi-language flexibility, giving creators complete freedom across dimensions and workflows.'}
             </p>
           </div>
 
@@ -215,10 +207,10 @@ export const HomePage: React.FC = () => {
                 Workspace Environment
               </div>
               <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-neutral-900 mb-3 font-sans">
-                The Workbench Editor
+                {hp.editorPreviewTitle || 'The Workbench Editor'}
               </h2>
               <p className="text-sm sm:text-base text-neutral-600 font-sans leading-relaxed">
-                A native desktop workspace designed with strict architectural separation between physical filesystem files on disk (Project Browser) and active scene nodes (Game Root).
+                {hp.editorPreviewDescription || 'A native desktop workspace designed with strict architectural separation between physical filesystem files on disk (Project Browser) and active scene nodes (Game Root).'}
               </p>
             </div>
 
@@ -231,10 +223,10 @@ export const HomePage: React.FC = () => {
             </Link>
           </div>
 
-          {/* Editor Preview Image (1791002482366.jpg) */}
+          {/* Editor Preview Image */}
           <div className="rounded-lg overflow-hidden border border-neutral-300 shadow-md bg-neutral-900">
             <img
-              src={WORKBENCH_ASSETS.EDITOR_PREVIEW}
+              src={hp.editorPreviewImage || '/images/1791002482366.jpg'}
               alt="Workbench Editor Interface Preview showing Game Root, Project Browser, and Inspector"
               className="w-full h-auto max-h-[600px] object-cover object-top block select-none"
               loading="lazy"
@@ -371,15 +363,15 @@ export const HomePage: React.FC = () => {
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4">
               <Link
-                to="/download"
+                to={hp.primaryButtonPath || '/download'}
                 className="btn-blueprint py-3.5 px-8 text-sm font-semibold tracking-wide flex items-center justify-center gap-2.5 cursor-pointer shadow-sm font-sans"
               >
                 <Download className="w-4 h-4" />
-                <span>Go to Download Page</span>
+                <span>{hp.primaryButtonText || 'Go to Download Page'}</span>
               </Link>
 
               <Link
-                to="/docs"
+                to={hp.secondaryButtonPath || '/docs'}
                 className="btn-blueprint-secondary py-3.5 px-8 text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer font-sans"
               >
                 <span>Read the Docs</span>

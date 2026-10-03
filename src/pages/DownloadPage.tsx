@@ -1,309 +1,243 @@
 import React, { useState } from 'react';
-import { WorkbenchLogo } from '../components/WorkbenchLogo';
+import { useContent } from '../context/ContentContext';
+import { ReleaseView } from '../components/ReleaseView';
+import { WorkbenchRelease } from '../types/content';
 import {
   Download,
+  Archive,
+  ChevronDown,
+  ChevronUp,
   Monitor,
-  Laptop,
   Terminal,
-  CheckCircle2
+  Laptop,
+  Calendar,
+  CheckCircle2,
+  FileText,
+  Clock,
+  Layers,
+  Cpu,
 } from 'lucide-react';
 
 export const DownloadPage: React.FC = () => {
-  const [selectedOS, setSelectedOS] = useState<'win' | 'mac' | 'linux'>('win');
-  const [prototypeModal, setPrototypeModal] = useState(false);
+  const { content } = useContent();
 
-  const platforms = [
-    {
-      id: 'win',
-      name: 'Windows',
-      icon: Monitor,
-      target: 'Windows 10 / 11 (64-bit / ARM64)',
-      filename: 'workbench-setup-v1.0.0.exe',
-      graphics: 'DirectX 12 / Vulkan 1.2',
-      size: '142 MB',
-      recommended: true,
-    },
-    {
-      id: 'mac',
-      name: 'macOS',
-      icon: Laptop,
-      target: 'macOS 13.0+ (Apple Silicon & Intel)',
-      filename: 'Workbench-v1.0.0-universal.dmg',
-      graphics: 'Metal 2.0+ Backend',
-      size: '158 MB',
-      recommended: false,
-    },
-    {
-      id: 'linux',
-      name: 'Linux',
-      icon: Terminal,
-      target: 'Ubuntu 22.04+, Fedora 38+, Arch (x86_64)',
-      filename: 'Workbench-v1.0.0.AppImage',
-      graphics: 'Vulkan 1.2+ / X11 & Wayland',
-      size: '136 MB',
-      recommended: false,
-    },
-  ];
+  const allReleases: WorkbenchRelease[] = content.releases || [];
 
-  const currentPlatform = platforms.find((p) => p.id === selectedOS) || platforms[0];
+  // Determine current active published release:
+  // 1. First look for release with isCurrent === true and status === 'published'
+  // 2. If not found, look for first release with status === 'published'
+  // 3. Fallback to first release
+  const publishedReleases = allReleases.filter((r) => r.status === 'published');
+  const currentRelease =
+    publishedReleases.find((r) => r.isCurrent) ||
+    publishedReleases[0] ||
+    allReleases.find((r) => r.isCurrent) ||
+    allReleases[0];
+
+  // Archive releases: All published or archived releases except the current release
+  const archivedReleases = allReleases.filter(
+    (r) => r.id !== currentRelease?.id && (r.status === 'archived' || r.status === 'published')
+  );
+
+  // Expanded state for archived releases (by release ID)
+  const [expandedArchiveIds, setExpandedArchiveIds] = useState<Record<string, boolean>>({});
+
+  const toggleArchiveExpand = (id: string) => {
+    setExpandedArchiveIds((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
 
   return (
     <div className="pt-16 min-h-screen bg-white">
-      {/* Header Banner */}
-      <section className="bg-neutral-50 border-b border-neutral-200 py-16 px-4 sm:px-6 lg:px-8 blueprint-grid">
-        <div className="max-w-7xl mx-auto text-center max-w-3xl">
-          <div className="flex justify-center mb-6">
-            <WorkbenchLogo size="lg" className="w-16 h-16 rounded shadow-sm" />
-          </div>
-
-          <div className="text-xs font-mono text-[#0e3052] uppercase tracking-wider mb-2 font-semibold">
+      {/* 1. HERO SECTION */}
+      <section className="bg-neutral-50 border-b border-neutral-200 py-16 lg:py-20 px-4 sm:px-6 lg:px-8 blueprint-grid">
+        <div className="max-w-7xl mx-auto text-center max-w-3xl space-y-4">
+          <div className="text-xs font-mono text-[#0e3052] uppercase tracking-wider font-semibold">
             Official Distribution Portal
           </div>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-neutral-900 mb-4 font-sans">
+
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-neutral-900 font-sans">
             Download Workbench
           </h1>
-          <p className="text-lg text-neutral-600 leading-relaxed font-sans">
-            A standalone 2D and 3D game engine for desktop and mobile development. Fast, lightweight, and completely self-contained.
+
+          <p className="text-base sm:text-lg text-neutral-600 leading-relaxed font-sans max-w-xl mx-auto">
+            Build. Create. Play. Download the latest version of Workbench for your platform.
           </p>
+
+          {/* Current Available Release Badge */}
+          {currentRelease ? (
+            <div className="pt-3 flex flex-wrap items-center justify-center gap-3 text-xs font-mono">
+              <span className="font-semibold text-neutral-900">
+                Workbench {currentRelease.version}
+              </span>
+              <span className="text-neutral-300">·</span>
+              <span className="text-neutral-600">
+                Latest {currentRelease.releaseType.toLowerCase()} release
+              </span>
+              {currentRelease.releaseDate && (
+                <>
+                  <span className="text-neutral-300">·</span>
+                  <span className="text-neutral-500">{currentRelease.releaseDate}</span>
+                </>
+              )}
+            </div>
+          ) : (
+            <div className="pt-3 text-xs font-mono text-neutral-500">
+              Workbench downloads are not available yet. Check back soon.
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Main Download Grid & Platform Selectors */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-16">
-        {/* Desktop Download Area */}
-        <section className="bg-white border border-neutral-200 rounded-lg p-6 sm:p-10 shadow-sm">
-          <div className="max-w-3xl mx-auto text-center space-y-6">
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              {platforms.map((p) => {
-                const Icon = p.icon;
-                return (
-                  <button
-                    key={p.id}
-                    onClick={() => setSelectedOS(p.id as any)}
-                    className={`px-4 py-2.5 rounded text-xs font-mono font-medium transition-all cursor-pointer flex items-center gap-2 ${
-                      selectedOS === p.id
-                        ? 'bg-[#0e3052] text-white font-semibold shadow-xs'
-                        : 'bg-neutral-100 text-neutral-700 border border-neutral-200 hover:bg-neutral-200/70 hover:text-neutral-900'
-                    }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span>{p.name}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Selected OS Details Box */}
-            <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-8 text-left space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-neutral-200">
-                <div>
-                  <div className="text-xs font-mono text-[#0e3052] uppercase tracking-wider font-semibold">
-                    Target Operating System
-                  </div>
-                  <h3 className="text-2xl font-bold text-neutral-900 font-sans mt-1">
-                    Workbench for {currentPlatform.name}
-                  </h3>
-                  <p className="text-xs font-mono text-neutral-500 mt-0.5">
-                    {currentPlatform.target}
-                  </p>
-                </div>
-
-                <div className="text-left sm:text-right font-mono text-xs text-neutral-600">
-                  <div>Package: <span className="text-neutral-900 font-semibold">{currentPlatform.size}</span></div>
-                  <div>Graphics: <span className="text-[#0e3052] font-semibold">{currentPlatform.graphics}</span></div>
-                </div>
+      {/* 2. MAIN PLATFORM DOWNLOAD SECTIONS (WINDOWS, LINUX, macOS) */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-20">
+        {currentRelease ? (
+          <div>
+            <div className="mb-8">
+              <div className="text-xs font-mono uppercase tracking-wider text-[#0e3052] font-semibold mb-1">
+                CURRENT RELEASE
               </div>
-
-              {/* Action Button */}
-              <div className="flex flex-col sm:flex-row items-center gap-4">
-                <button
-                  onClick={() => setPrototypeModal(true)}
-                  className="btn-blueprint w-full sm:w-auto px-8 py-4 text-sm font-semibold tracking-wide flex items-center justify-center gap-3 cursor-pointer shadow-sm font-sans"
-                >
-                  <Download className="w-5 h-5" />
-                  <span>Download {currentPlatform.filename}</span>
-                </button>
-
-                <span className="text-xs font-mono text-neutral-500">
-                  SHA-256 Verified · Standalone Installer
-                </span>
-              </div>
+              <h2 className="text-2xl font-bold tracking-tight text-neutral-900 font-sans">
+                Workbench {currentRelease.version}
+              </h2>
+              <p className="text-xs text-neutral-600 font-sans mt-0.5">
+                Released {currentRelease.releaseDate} · Standalone desktop engine runtime
+              </p>
             </div>
 
-            {/* Current Version Spec Notice */}
-            <div className="flex flex-wrap items-center justify-center gap-6 text-xs font-mono text-neutral-600 pt-2">
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-600" />
-                <span>Version: <strong className="text-neutral-900">v1.0.0-prototype</strong></span>
-              </span>
-              <span>License: <strong className="text-neutral-900">Standard Engine License</strong></span>
-              <span>Release Stage: <strong className="text-neutral-900">Public Prototype Preview</strong></span>
-            </div>
+            {/* Render Windows, Linux, macOS cards */}
+            <ReleaseView release={currentRelease} />
           </div>
-        </section>
+        ) : (
+          <div className="p-12 text-center border border-dashed border-neutral-300 rounded-md bg-neutral-50 max-w-xl mx-auto space-y-2">
+            <h3 className="text-base font-bold text-neutral-800 font-sans">No Public Releases Active</h3>
+            <p className="text-xs text-neutral-500 font-sans">
+              Workbench downloads are not available yet. Please check back soon or log in to the developer panel to publish a release.
+            </p>
+          </div>
+        )}
 
-        {/* System Requirements (Minimum vs Recommended) */}
-        <section className="space-y-6">
-          <div className="max-w-3xl">
-            <h2 className="text-2xl font-bold text-neutral-900 font-sans">
-              System Hardware Requirements
+        {/* ------------------------------------------------------------- */}
+        {/* 3. ARCHIVE SECTION */}
+        {/* ------------------------------------------------------------- */}
+        <section className="pt-10 border-t border-neutral-200 space-y-8">
+          <div className="max-w-2xl">
+            <div className="text-xs font-mono uppercase tracking-wider text-[#0e3052] font-semibold mb-1 flex items-center gap-1.5">
+              <Archive className="w-4 h-4" />
+              <span>PREVIOUS RELEASES</span>
+            </div>
+            <h2 className="text-3xl font-bold tracking-tight text-neutral-900 font-sans">
+              Archive
             </h2>
             <p className="text-sm text-neutral-600 font-sans mt-1">
-              Workbench is engineered to run smoothly on modern laptops and high-performance developer workstations alike.
+              Download previous versions of Workbench in chronological order. All historical platform binaries, release notes, and requirements are preserved.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Minimum Spec */}
-            <div className="bg-white border border-neutral-200 rounded-lg p-6 space-y-4 shadow-xs">
-              <div className="flex items-center justify-between pb-3 border-b border-neutral-200">
-                <h3 className="text-base font-bold text-neutral-900 font-sans">Minimum Specifications</h3>
-                <span className="text-[10px] font-mono text-neutral-600 bg-neutral-100 px-2 py-0.5 rounded border border-neutral-200">
-                  Entry 2D &amp; Low-Poly 3D
-                </span>
-              </div>
+          {archivedReleases.length > 0 ? (
+            <div className="space-y-4">
+              {archivedReleases.map((archiveRel) => {
+                const isExpanded = !!expandedArchiveIds[archiveRel.id];
 
-              <div className="space-y-3 font-mono text-xs text-neutral-700">
-                <div className="flex justify-between">
-                  <span className="text-neutral-500">Operating System:</span>
-                  <span>Windows 10 / macOS 13 / Ubuntu 22.04</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-neutral-500">Processor:</span>
-                  <span>Intel Core i3 / AMD Ryzen 3 / Apple M1</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-neutral-500">Memory (RAM):</span>
-                  <span>4 GB RAM</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-neutral-500">Graphics Card:</span>
-                  <span>Vulkan 1.1 / Metal / DirectX 11 support</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-neutral-500">Storage:</span>
-                  <span>500 MB free disk space</span>
-                </div>
-              </div>
+                return (
+                  <div
+                    key={archiveRel.id}
+                    className="border border-neutral-200 rounded-md bg-white overflow-hidden shadow-xs hover:border-neutral-300 transition-colors"
+                  >
+                    {/* Collapsed Bar */}
+                    <div className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2.5">
+                          <span className="text-base font-bold text-neutral-900 font-sans">
+                            Workbench {archiveRel.version}
+                          </span>
+                          <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-neutral-100 text-neutral-600 border border-neutral-200 uppercase">
+                            {archiveRel.releaseType}
+                          </span>
+                        </div>
+                        <div className="text-xs font-mono text-neutral-500">
+                          Released {archiveRel.releaseDate}
+                        </div>
+                      </div>
+
+                      {/* Quick Download Link Strip */}
+                      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                        {/* Windows quick link */}
+                        {archiveRel.windows.available && archiveRel.windows.downloadUrl ? (
+                          <a
+                            href={archiveRel.windows.downloadUrl}
+                            download={archiveRel.windows.filename || true}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-1.5 rounded text-xs font-mono font-medium text-neutral-800 bg-neutral-100 hover:bg-neutral-200/70 border border-neutral-300 transition-colors flex items-center gap-1.5"
+                            title={`Download Windows (${archiveRel.windows.filesize || ''})`}
+                          >
+                            <Monitor className="w-3.5 h-3.5 text-sky-700" />
+                            <span>Windows</span>
+                          </a>
+                        ) : null}
+
+                        {/* Linux quick link */}
+                        {archiveRel.linux.available && archiveRel.linux.downloadUrl ? (
+                          <a
+                            href={archiveRel.linux.downloadUrl}
+                            download={archiveRel.linux.filename || true}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-1.5 rounded text-xs font-mono font-medium text-neutral-800 bg-neutral-100 hover:bg-neutral-200/70 border border-neutral-300 transition-colors flex items-center gap-1.5"
+                            title={`Download Linux (${archiveRel.linux.filesize || ''})`}
+                          >
+                            <Terminal className="w-3.5 h-3.5 text-amber-700" />
+                            <span>Linux</span>
+                          </a>
+                        ) : null}
+
+                        {/* macOS quick link */}
+                        {archiveRel.macos.available && archiveRel.macos.downloadUrl ? (
+                          <a
+                            href={archiveRel.macos.downloadUrl}
+                            download={archiveRel.macos.filename || true}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-1.5 rounded text-xs font-mono font-medium text-neutral-800 bg-neutral-100 hover:bg-neutral-200/70 border border-neutral-300 transition-colors flex items-center gap-1.5"
+                            title={`Download macOS (${archiveRel.macos.filesize || ''})`}
+                          >
+                            <Laptop className="w-3.5 h-3.5 text-neutral-800" />
+                            <span>macOS</span>
+                          </a>
+                        ) : null}
+
+                        {/* Expand / Collapse Details Button */}
+                        <button
+                          type="button"
+                          onClick={() => toggleArchiveExpand(archiveRel.id)}
+                          className="px-3 py-1.5 text-xs font-sans font-medium text-[#0e3052] hover:bg-neutral-100 rounded cursor-pointer transition-colors flex items-center gap-1 ml-auto sm:ml-2"
+                        >
+                          <span>{isExpanded ? 'Hide Details' : 'Details'}</span>
+                          {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Expandable Full Release View for Archived Version */}
+                    {isExpanded && (
+                      <div className="p-5 sm:p-6 border-t border-neutral-200 bg-neutral-50/50">
+                        <ReleaseView release={archiveRel} />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-
-            {/* Recommended Spec */}
-            <div className="bg-neutral-50 border border-neutral-300 rounded-lg p-6 space-y-4 shadow-xs">
-              <div className="flex items-center justify-between pb-3 border-b border-neutral-200">
-                <h3 className="text-base font-bold text-[#0e3052] font-sans">Recommended Specifications</h3>
-                <span className="text-[10px] font-mono text-[#0e3052] bg-white px-2 py-0.5 rounded border border-neutral-300 font-semibold">
-                  Full PBR 3D &amp; Complex Physics
-                </span>
-              </div>
-
-              <div className="space-y-3 font-mono text-xs text-neutral-700">
-                <div className="flex justify-between">
-                  <span className="text-neutral-500">Operating System:</span>
-                  <span>Windows 11 / macOS 14+ / Linux 6.x</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-neutral-500">Processor:</span>
-                  <span>Intel Core i7 / AMD Ryzen 7 / Apple M2+</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-neutral-500">Memory (RAM):</span>
-                  <span>16 GB RAM</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-neutral-500">Graphics Card:</span>
-                  <span>NVIDIA RTX / AMD Radeon RX / Apple M-series</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-neutral-500">Storage:</span>
-                  <span>2 GB SSD space</span>
-                </div>
-              </div>
+          ) : (
+            <div className="p-6 text-center border border-dashed border-neutral-300 rounded-md bg-neutral-50 text-xs font-mono text-neutral-500">
+              No historical releases archived yet. Prior builds will automatically accumulate here as new versions are published.
             </div>
-          </div>
-        </section>
-
-        {/* Installation & Setup Guide */}
-        <section className="bg-white border border-neutral-200 rounded-lg p-6 sm:p-8 space-y-6 shadow-xs">
-          <h2 className="text-2xl font-bold text-neutral-900 font-sans">
-            Installation &amp; First Run Instructions
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs text-neutral-700 font-sans">
-            <div className="space-y-2">
-              <div className="font-bold text-neutral-900 flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full bg-[#0e3052] text-white flex items-center justify-center font-mono text-xs font-semibold">1</span>
-                <span>Extract / Run Installer</span>
-              </div>
-              <p className="text-neutral-600 leading-relaxed">
-                Launch the setup package. Workbench will install the runtime and associate <code className="font-mono text-neutral-900 font-semibold">.scene</code> and <code className="font-mono text-neutral-900 font-semibold">.wbscript</code> file extensions.
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <div className="font-bold text-neutral-900 flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full bg-[#0e3052] text-white flex items-center justify-center font-mono text-xs font-semibold">2</span>
-                <span>Select Workspace Directory</span>
-              </div>
-              <p className="text-neutral-600 leading-relaxed">
-                Choose a project location on your local drive. The Project Browser will initialize default template folders and scene manifests.
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <div className="font-bold text-neutral-900 flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full bg-[#0e3052] text-white flex items-center justify-center font-mono text-xs font-semibold">3</span>
-                <span>Launch &amp; Author</span>
-              </div>
-              <p className="text-neutral-600 leading-relaxed">
-                Open the 2D or 3D viewport, add game nodes into the Game Root, and test your first script with in-editor hot-reloading.
-              </p>
-            </div>
-          </div>
+          )}
         </section>
       </div>
-
-      {/* Prototype Notice Modal */}
-      {prototypeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
-          <div className="bg-white border border-neutral-300 max-w-md w-full rounded-lg p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-neutral-200">
-              <div className="flex items-center gap-2">
-                <WorkbenchLogo size="sm" className="w-7 h-7 rounded" />
-                <span className="font-bold text-neutral-900 text-base font-sans">Workbench Installer</span>
-              </div>
-              <span className="text-[10px] font-mono text-[#0e3052] bg-neutral-100 px-2 py-0.5 rounded border border-neutral-200 font-semibold">
-                Prototype Notice
-              </span>
-            </div>
-
-            <div className="space-y-3 text-xs text-neutral-700 leading-relaxed font-sans">
-              <p>
-                You triggered the download action for <strong className="text-neutral-900">{currentPlatform.filename}</strong>.
-              </p>
-              <div className="bg-neutral-50 p-3.5 rounded border border-neutral-200 text-neutral-700 font-mono text-[11px] space-y-1.5">
-                <div className="flex items-center gap-2 text-emerald-700 font-bold">
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Website Prototype Verified</span>
-                </div>
-                <div>Runtime: <span className="text-neutral-900 font-semibold">2D + 3D Engine Core</span></div>
-                <div>Notice: <span className="text-amber-800">Standalone binaries are built in Visual Studio</span></div>
-              </div>
-              <p className="text-neutral-500 text-[11px]">
-                As specified in the development brief, this is an official website prototype. The production binaries will be distributed and signed following the Visual Studio engine build cycle.
-              </p>
-            </div>
-
-            <div className="pt-3 border-t border-neutral-200 flex justify-end gap-2">
-              <button
-                onClick={() => setPrototypeModal(false)}
-                className="btn-blueprint px-5 py-2 text-xs font-mono font-semibold cursor-pointer"
-              >
-                Close Prototype Notice
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

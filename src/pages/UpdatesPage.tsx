@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useContent } from '../context/ContentContext';
 import {
   Newspaper,
   Calendar,
@@ -6,70 +7,11 @@ import {
 } from 'lucide-react';
 
 export const UpdatesPage: React.FC = () => {
+  const { content } = useContent();
   const [filterCategory, setFilterCategory] = useState<string>('all');
 
-  const updates = [
-    {
-      id: 'update-01',
-      version: 'v1.0.0-prototype',
-      date: 'October 2026',
-      type: 'Prototype Milestone',
-      category: 'milestones',
-      badge: 'Release Spec',
-      title: 'Workbench Prototype Architecture Specification Published',
-      summary: 'Public preview of the Workbench game engine website prototype, showcasing .wbscript syntax, .wbvisual node flow, and Project Root vs Game Root separation.',
-      details: [
-        'Interactive showcase of .wbscript native game DSL grammar.',
-        'Specification of the dual hierarchy tree (Project Browser on disk vs Game Root in active scene).',
-        'Multiplatform export roadmap targeting Windows (x64/ARM64), macOS (Apple Silicon/Intel), Linux, iOS, and Android.',
-      ],
-    },
-    {
-      id: 'update-02',
-      version: 'Devlog #03',
-      date: 'September 2026',
-      type: 'Engine Devlog',
-      category: 'engine',
-      badge: 'Architecture',
-      title: 'Designing Zero-Boilerplate Event Grammar for .wbscript',
-      summary: 'Deep-dive into the design decisions behind the "when <event>:" keyword structure and native JIT execution dispatch.',
-      details: [
-        'Removal of complex boilerplate classes and excessive syntax brackets.',
-        'Deterministic memory management with zero garbage collection pauses during critical gameplay loops.',
-        'Direct static type inference for player coordinates and physics vectors.',
-      ],
-    },
-    {
-      id: 'update-03',
-      version: 'RFC #08',
-      date: 'August 2026',
-      type: 'Language RFC',
-      category: 'rfc',
-      badge: 'Visual Scripting',
-      title: 'RFC: Parity Between .wbvisual Node Graphs and Text Code',
-      summary: 'Drafting the node compilation architecture to guarantee that visual scripting compiles to identical bytecode without reflection bottlenecks.',
-      details: [
-        'Execution pin signal routing with visual pulse debugging in editor.',
-        'Custom node macros for encapsulating math formulas and sub-state graphs.',
-        'Strict typed data pins for 2D/3D vectors and entity references.',
-      ],
-    },
-    {
-      id: 'update-04',
-      version: 'Devlog #02',
-      date: 'July 2026',
-      type: 'Engine Devlog',
-      category: 'engine',
-      badge: 'Graphics',
-      title: 'Integrating Vulkan & Metal Render Pipelines for 2D/3D',
-      summary: 'Engineering the unified render graph capable of switching seamlessly between integer-aligned 2D tilemaps and full metallic PBR 3D shading.',
-      details: [
-        'Dedicated orthographic 2D sub-pixel snapping buffer.',
-        'Cascaded shadow mapping (CSM) and normal-mapped 2D dynamic lighting.',
-        'glTF and FBX model drag-and-drop importer architecture.',
-      ],
-    },
-  ];
+  const publishedUpdates = content.updates.filter((u) => u.published);
+  const activeUpdates = publishedUpdates.length > 0 ? publishedUpdates : content.updates;
 
   const categories = [
     { id: 'all', label: 'All Updates' },
@@ -78,7 +20,7 @@ export const UpdatesPage: React.FC = () => {
     { id: 'rfc', label: 'Architecture RFCs' },
   ];
 
-  const filteredUpdates = updates.filter((u) => {
+  const filteredUpdates = activeUpdates.filter((u) => {
     if (filterCategory === 'all') return true;
     return u.category === filterCategory;
   });
@@ -151,7 +93,7 @@ export const UpdatesPage: React.FC = () => {
                   </span>
                 </div>
                 <span className="text-[11px] font-mono text-neutral-500 uppercase">
-                  {post.badge}
+                  {post.badge || post.category}
                 </span>
               </div>
 
@@ -165,19 +107,21 @@ export const UpdatesPage: React.FC = () => {
               </p>
 
               {/* Key Bullet Highlights */}
-              <div className="bg-neutral-50 p-4 rounded border border-neutral-200 space-y-2 font-sans text-xs text-neutral-700">
-                <div className="text-[10px] font-mono text-[#0e3052] uppercase tracking-wider font-semibold">
-                  Key Technical Notes
+              {post.details && post.details.length > 0 && (
+                <div className="bg-neutral-50 p-4 rounded border border-neutral-200 space-y-2 font-sans text-xs text-neutral-700">
+                  <div className="text-[10px] font-mono text-[#0e3052] uppercase tracking-wider font-semibold">
+                    Key Technical Notes
+                  </div>
+                  <ul className="space-y-1.5">
+                    {post.details.map((detail, dIdx) => (
+                      <li key={dIdx} className="flex items-start gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#0e3052] mt-1.5 shrink-0" />
+                        <span>{detail}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <ul className="space-y-1.5">
-                  {post.details.map((detail, dIdx) => (
-                    <li key={dIdx} className="flex items-start gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#0e3052] mt-1.5 shrink-0" />
-                      <span>{detail}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              )}
             </article>
           ))}
         </div>

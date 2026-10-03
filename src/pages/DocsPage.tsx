@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useContent } from '../context/ContentContext';
 import {
   BookOpen,
   ChevronRight,
@@ -11,380 +12,60 @@ import {
 } from 'lucide-react';
 
 export const DocsPage: React.FC = () => {
+  const { content } = useContent();
   const [activeDocId, setActiveDocId] = useState<string>('intro');
   const [mobileDocsOpen, setMobileDocsOpen] = useState(false);
 
-  const docSections = [
-    {
-      group: 'Getting Started',
-      items: [
-        {
-          id: 'intro',
-          title: 'Introduction to Workbench',
-          summary: 'Overview of engine design philosophy and architecture.',
-          content: {
-            text: `Workbench is a standalone 2D and 3D game engine engineered for desktop and mobile development. Designed with a clean engineering aesthetic and strict separation of concerns, Workbench emphasizes developer ergonomics, deterministic performance, and multi-language versatility.`,
-            keyPoints: [
-              'Independent Desktop Runtime: Native Windows (x64/ARM64), macOS (Apple Silicon & Intel), and Linux executables.',
-              'Multi-Language Logic: Write gameplay in native .wbscript, Python 3.12, or the .wbvisual node compiler.',
-              'Strict Scene Modularity: Every .scene file can be instantiated and nested as a reusable component.',
-            ],
-          },
-        },
-        {
-          id: 'install',
-          title: 'Installation & Setup',
-          summary: 'System requirements and environment setup for developers.',
-          content: {
-            text: `Workbench is distributed as a lightweight, self-contained standalone executable with zero external SDK dependencies required for basic 2D and 3D authoring.`,
-            code: `# Windows
-workbench-setup.exe /SILENT
+  // Group published docs by category
+  const publishedDocs = content.docs.filter((d) => d.published);
+  const activeDocs = publishedDocs.length > 0 ? publishedDocs : content.docs;
 
-# macOS
-brew install --cask workbench-engine # (Planned distribution)
-
-# Linux AppImage
-chmod +x Workbench-v1.0.0.AppImage && ./Workbench-v1.0.0.AppImage`,
-            keyPoints: [
-              'Requires a graphics adapter supporting Vulkan 1.2+, Metal 2.0+, or DirectX 12.',
-              'No mandatory cloud sign-ins or telemetry services required.',
-            ],
-          },
-        },
-        {
-          id: 'create-project',
-          title: 'Creating a Project',
-          summary: 'How to initialize and configure a new Workbench workspace.',
-          content: {
-            text: `When you create a project in Workbench, the engine initializes a dedicated filesystem root containing standard directory conventions (/Scenes, /Assets, /Scripts, /Materials, /Audio, /Settings) along with a workbench.config manifest file.`,
-            keyPoints: [
-              'Deterministic file paths: Raw disk directories map 1:1 into the Project Browser.',
-              'Automatic asset indexing: Assets added directly via Windows Explorer or macOS Finder are indexed immediately.',
-            ],
-          },
-        },
-        {
-          id: 'create-scene',
-          title: 'Creating a Scene',
-          summary: 'Structuring worlds, entities, and camera setups.',
-          content: {
-            text: `A Scene is a hierarchical tree of nodes that defines a level, world area, or isolated game entity. You can create a 2D scene, 3D scene, or UI scene using the File -> New Scene menu.`,
-            keyPoints: [
-              'Scenes are serialized as human-readable .scene text files.',
-              'Scenes contain a root Game node with child entities, cameras, lighting, and colliders.',
-            ],
-          },
-        },
-        {
-          id: 'running-game',
-          title: 'Running & Playtesting',
-          summary: 'In-editor play mode, sub-stepping, and hot-reload behavior.',
-          content: {
-            text: `Clicking the Play button in the top menu bar launches the game loop inside the active viewport at native frame rates. You can pause, frame-advance, inspect runtime node state, and hot-reload scripts while the game is running.`,
-            keyPoints: [
-              'Pause & Step: Step forward 1 physics tick (16.6ms at 60Hz) to debug collisions.',
-              'Hot-Reload: Save changes to .wbscript or Python files to update running logic live.',
-            ],
-          },
-        },
-      ],
-    },
-    {
-      group: 'Editor',
-      items: [
-        {
-          id: 'editor-overview',
-          title: 'Editor Overview',
-          summary: 'Navigating the Workbench workspace layout and panels.',
-          content: {
-            text: `The Workbench Editor interface consists of 5 core zones:
-1. Top Menu & Control Bar: Project commands, Run/Build toggles, and coordinate display.
-2. Game Root (Top Left): The live node tree of the currently loaded active scene.
-3. Project Browser (Bottom Left): Physical filesystem browser for disk assets.
-4. Scene Viewport (Center): Interactive 2D/3D viewport with transform gizmos and grid.
-5. Inspector (Right): Properties, transforms, components, and script bindings for selected nodes.`,
-          },
-        },
-        {
-          id: 'project-root-docs',
-          title: 'Project Root (Filesystem)',
-          summary: 'Disk directory structure and asset management rules.',
-          content: {
-            text: `The Project Root represents the physical folders on your computer:
-• Scenes/ (.scene files)
-• Assets/ (Textures, sprites, models, audio)
-• Scripts/ (.wbscript, .py, .wbvisual)
-• Materials/ (.material, shader graphs)
-• Audio/ (.wav, .ogg, .mp3)
-• Settings/ (Input maps, display settings)
-
-Rule: The Project Browser strictly browses storage files on disk. It never contains instantiated game nodes.`,
-          },
-        },
-        {
-          id: 'game-root-docs',
-          title: 'Game Root (Active Scene)',
-          summary: 'Understanding the active scene node hierarchy.',
-          content: {
-            text: `The Game Root represents ONLY what is currently instantiated in the active open scene:
-Game
-├── Player
-│   ├── Body
-│   ├── Camera
-│   └── Collider
-├── Enemy
-├── Ground
-└── Main Camera
-
-Rule: The Game Root strictly displays open scene entities. It does not list uninstantiated disk assets.`,
-          },
-        },
-        {
-          id: 'scene-editor',
-          title: 'Scene Editor & Viewport',
-          summary: 'Transform gizmos, orthographic grids, and 3D navigation.',
-          content: {
-            text: `The viewport supports toggleable Orthographic 2D mode with pixel snapping, as well as Perspective 3D mode with free-fly camera controls (WASD + Right Mouse Button).`,
-          },
-        },
-        {
-          id: 'inspector',
-          title: 'Inspector Panel',
-          summary: 'Modifying transforms, component properties, and script parameters.',
-          content: {
-            text: `Selecting any node in the Game Root opens its component stack in the Inspector. You can adjust positions, toggle render layers, tweak physics friction, and bind script files.`,
-          },
-        },
-        {
-          id: 'asset-browser',
-          title: 'Asset Browser',
-          summary: 'Importing, tagging, and dragging assets into scenes.',
-          content: {
-            text: `Drag textures, audio files, or .scene files directly from the Project Browser onto the Scene Viewport or Game Root to instantiate them instantly.`,
-          },
-        },
-      ],
-    },
-    {
-      group: 'Scenes',
-      items: [
-        {
-          id: 'creating-scenes',
-          title: 'Creating Scenes',
-          summary: 'Standard scene creation and hierarchical node arrangement.',
-          content: {
-            text: `Every scene begins with a root node (typically named 'Game' or the entity name). You can attach child transforms, cameras, audio listeners, and physics bodies.`,
-          },
-        },
-        {
-          id: 'reusable-scenes-docs',
-          title: 'Reusable Scenes',
-          summary: 'Modular entity authoring (e.g. Player.scene, Enemy.scene).',
-          content: {
-            text: `In Workbench, any .scene can act as a reusable component (prefab). Build a Player.scene with Body, Camera, Collider, and Player Controller, then drag Player.scene into 50 different level scenes.`,
-            code: `// Master Definition: Player.scene
-Player (Root)
-├── Body (MeshRenderer)
-├── Camera (CameraComponent)
-├── Collider (CapsuleCollider)
-└── Player Controller (PlayerController.wb)
-
-// Instantiated in World_01.scene:
-Game
-├── Player (Instance of Player.scene)
-├── Boss (Instance of Boss.scene)
-└── Ground`,
-          },
-        },
-        {
-          id: 'scene-instances',
-          title: 'Scene Instances',
-          summary: 'Instantiating scenes at design time or runtime via script.',
-          content: {
-            text: `Instantiate scenes programmatically in .wbscript:
-let enemy = Scene.instantiate("Enemy.scene")
-enemy.position = Vec3(10, 0, 5)`,
-          },
-        },
-        {
-          id: 'property-overrides',
-          title: 'Property Overrides',
-          summary: 'Overriding properties on specific instances without breaking links.',
-          content: {
-            text: `When a scene instance is modified inside a level, only the edited properties are marked as overrides. If you update the master Player.scene, all non-overridden fields in all instances update automatically.`,
-          },
-        },
-      ],
-    },
-    {
-      group: 'Programming',
-      items: [
-        {
-          id: 'prog-wbscript',
-          title: '.wbscript Language',
-          summary: 'Native scripting language for Workbench.',
-          content: {
-            text: `.wbscript is Workbench's native game language designed for crystal-clear gameplay mechanics, zero boilerplate, and native machine execution.`,
-            code: `player.speed = 5
-player.health = 100
-
-when game starts:
-    player.spawn()
-
-when jump:
-    player.jump()
-
-function heal amount:
-    player.health += amount`,
-            keyPoints: [
-              'Click below to read the dedicated .wbscript Documentation page with full grammar, type rules, and event references.',
-            ],
-            link: '/docs/wbscript',
-            linkText: 'Read Full .wbscript Language Spec →',
-          },
-        },
-        {
-          id: 'prog-wbvisual',
-          title: '.wbvisual Node Graph',
-          summary: 'Full visual programming system for logic and state machines.',
-          content: {
-            text: `.wbvisual is a full visual programming system, not merely a beginner tool. It compiles to native bytecode with execution and typed data pins.`,
-            code: `[Player Touches Coin]
-        ↓
-[Add 1 To Score]
-        ↓
-[Destroy Coin]
-        ↓
-[Play Sound]`,
-            keyPoints: [
-              'Click below to read the dedicated .wbvisual Documentation page with node types, data channels, and macro systems.',
-            ],
-            link: '/docs/wbvisual',
-            linkText: 'Read Full .wbvisual Visual Scripting Spec →',
-          },
-        },
-        {
-          id: 'prog-python',
-          title: 'Python 3.12 API',
-          summary: 'Python bindings for AI, procedural generation, and tools.',
-          content: {
-            text: `Workbench embeds Python 3.12 with direct memory access to engine transform and physics structures.`,
-            code: `import workbench as wb
-
-class AIController(wb.Component):
-    def on_start(self):
-        self.speed = 4.5
-
-    def on_update(self, dt: float):
-        if self.target:
-            self.entity.move_toward(self.target.position, self.speed * dt)`,
-          },
-        },
-      ],
-    },
-    {
-      group: 'Systems',
-      items: [
-        {
-          id: 'sys-2d',
-          title: '2D Pipeline & Tilemaps',
-          summary: 'Tilemap palettes, autotiling, and sprite sorting.',
-          content: {
-            text: `The 2D subsystem includes hardware-accelerated tilemap layers, sprite sheet slicing, and 2D dynamic lighting shaders with normal-mapping.`,
-          },
-        },
-        {
-          id: 'sys-3d',
-          title: '3D PBR & Shaders',
-          summary: 'Metallic/roughness PBR materials, lights, and shadows.',
-          content: {
-            text: `The 3D renderer supports directional lights with cascaded shadow maps, point/spot lights with radius falloff, and post-processing stacks.`,
-          },
-        },
-        {
-          id: 'sys-physics',
-          title: 'Physics & Collisions',
-          summary: 'Rigid body dynamics, layers, raycasting, and triggers.',
-          content: {
-            text: `Rigid body dynamics for 2D and 3D worlds. Includes continuous collision detection (CCD), physics materials with friction and restitution, and collision matrix filtering.`,
-          },
-        },
-        {
-          id: 'sys-animation',
-          title: 'Animation & State Machines',
-          summary: 'Keyframe curves, skeletal mesh skinning, and blend trees.',
-          content: {
-            text: `Timeline-based keyframing and state machine blending graphs. Supports root motion extraction and IK (Inverse Kinematics).`,
-          },
-        },
-        {
-          id: 'sys-audio',
-          title: 'Audio Subsystem',
-          summary: 'Positional 3D audio, reverb zones, and mixing busses.',
-          content: {
-            text: `Dedicated low-latency audio thread with distance attenuation, Doppler frequency shifting, and multi-bus mixing snapshots.`,
-          },
-        },
-        {
-          id: 'sys-ui',
-          title: 'UI & Vector Canvas',
-          summary: 'Responsive anchoring, flex boxes, and font rendering.',
-          content: {
-            text: `Vector-based UI canvas with anchor/pivot controls, font fallbacks, and automatic gamepad focus navigation.`,
-          },
-        },
-        {
-          id: 'sys-input',
-          title: 'Input Management',
-          summary: 'Action mapping for keyboard, mouse, gamepad, and touch.',
-          content: {
-            text: `Action-based input system (e.g. "Jump", "Fire", "Move_X") mapped across keyboard keys, mouse axes, gamepad thumbsticks, and mobile touch gestures.`,
-          },
-        },
-      ],
-    },
-    {
-      group: 'Advanced (Architecture Roadmap)',
-      items: [
-        {
-          id: 'adv-networking',
-          title: 'Networking & Multiplayer (Planned)',
-          summary: 'Architecture for client-server and peer-to-peer replication.',
-          content: {
-            text: `[Planned Engine Architecture Notice]: Workbench's networking layer is designed around an authoritative server model with client-side prediction and snapshot interpolation. This section documents planned architecture and API specifications for future releases.`,
-            keyPoints: [
-              'Delta-compressed entity state synchronization over UDP.',
-              'Remote Procedure Calls (RPCs) in .wbscript and Python.',
-            ],
-          },
-        },
-        {
-          id: 'adv-save-systems',
-          title: 'Save Systems & Serialization (Planned)',
-          summary: 'Binary and JSON state serialization for game progression.',
-          content: {
-            text: `[Planned Engine Architecture Notice]: Workbench provides built-in entity state serialization, allowing developers to save scene snapshots and player inventories to encrypted binary or JSON files.`,
-          },
-        },
-        {
-          id: 'adv-optimization',
-          title: 'Optimization & Profiling (Planned)',
-          summary: 'Frame profiler, draw call batching, and memory telemetry.',
-          content: {
-            text: `[Planned Engine Architecture Notice]: Integrated CPU/GPU timeline profiler measuring draw call counts, physics sub-step duration, and script execution times.`,
-          },
-        },
-        {
-          id: 'adv-build-export',
-          title: 'Build & Export Pipeline (Planned)',
-          summary: 'Standalone executable packaging and asset cooking.',
-          content: {
-            text: `[Planned Engine Architecture Notice]: One-click asset cooking, shader bytecode compilation, and executable bundling for Windows, macOS, Linux, iOS, and Android.`,
-          },
-        },
-      ],
-    },
+  // Group into sections
+  const categoryOrder = [
+    'Getting Started',
+    'Editor',
+    'Scenes',
+    'Programming',
+    '.wbscript',
+    '.wbvisual',
+    'Systems',
+    'Advanced',
   ];
+
+  const groupedMap = new Map<string, typeof activeDocs>();
+  activeDocs.forEach((doc) => {
+    const cat = doc.category || 'General';
+    if (!groupedMap.has(cat)) {
+      groupedMap.set(cat, []);
+    }
+    groupedMap.get(cat)!.push(doc);
+  });
+
+  // Sort categories by predefined order
+  const categoriesPresent = Array.from(groupedMap.keys()).sort((a, b) => {
+    const idxA = categoryOrder.indexOf(a);
+    const idxB = categoryOrder.indexOf(b);
+    if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+    if (idxA !== -1) return -1;
+    if (idxB !== -1) return 1;
+    return a.localeCompare(b);
+  });
+
+  const docSections = categoriesPresent.map((category) => ({
+    group: category,
+    items: groupedMap.get(category)!.map((d) => ({
+      id: d.id,
+      title: d.title,
+      summary: d.summary,
+      content: {
+        text: d.text,
+        code: d.code,
+        keyPoints: d.keyPoints,
+        link: d.link,
+        linkText: d.linkText,
+      },
+    })),
+  }));
 
   // Find currently active doc item
   let currentDoc: any = null;
@@ -396,8 +77,15 @@ class AIController(wb.Component):
       }
     }
   }
-  if (!currentDoc) {
+  if (!currentDoc && docSections.length > 0 && docSections[0].items.length > 0) {
     currentDoc = docSections[0].items[0];
+  }
+  if (!currentDoc) {
+    currentDoc = {
+      title: 'Documentation',
+      summary: 'No published documentation articles found.',
+      content: { text: 'Articles are currently being updated.' },
+    };
   }
 
   return (
@@ -459,7 +147,7 @@ class AIController(wb.Component):
           >
             <div className="text-xs font-mono text-neutral-600 uppercase tracking-wider pb-2 border-b border-neutral-200 flex items-center justify-between font-semibold">
               <span>Documentation Index</span>
-              <span className="text-[10px] text-[#0e3052] font-mono">v1.0.0-prototype</span>
+              <span className="text-[10px] text-[#0e3052] font-mono">v{content.settings.currentEngineVersion}</span>
             </div>
 
             <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-1">
@@ -516,11 +204,11 @@ class AIController(wb.Component):
 
             {/* Topic Text Body */}
             <div className="text-sm text-neutral-700 leading-relaxed font-sans whitespace-pre-line space-y-4 font-normal">
-              {currentDoc.content.text}
+              {currentDoc.content?.text}
             </div>
 
             {/* Code Block if available */}
-            {currentDoc.content.code && (
+            {currentDoc.content?.code && (
               <div className="space-y-2">
                 <div className="text-xs font-mono text-neutral-600 uppercase tracking-wider font-semibold">
                   Specification / Syntax Example
@@ -534,7 +222,7 @@ class AIController(wb.Component):
             )}
 
             {/* Key Points if available */}
-            {currentDoc.content.keyPoints && (
+            {currentDoc.content?.keyPoints && currentDoc.content.keyPoints.length > 0 && (
               <div className="space-y-2 pt-4 border-t border-neutral-200">
                 <div className="text-xs font-mono text-neutral-600 uppercase tracking-wider font-semibold">
                   Key Takeaways
@@ -551,13 +239,13 @@ class AIController(wb.Component):
             )}
 
             {/* Direct Link if available */}
-            {currentDoc.content.link && (
+            {currentDoc.content?.link && (
               <div className="pt-4 border-t border-neutral-200">
                 <Link
                   to={currentDoc.content.link}
                   className="btn-blueprint inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold font-sans"
                 >
-                  <span>{currentDoc.content.linkText}</span>
+                  <span>{currentDoc.content.linkText || 'Read Spec →'}</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>

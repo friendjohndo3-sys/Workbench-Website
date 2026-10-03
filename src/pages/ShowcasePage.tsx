@@ -1,14 +1,20 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useContent } from '../context/ContentContext';
 import {
   Grid,
   UploadCloud,
   CheckCircle2,
   Clock,
-  ArrowRight
+  ArrowRight,
+  ExternalLink,
 } from 'lucide-react';
 
 export const ShowcasePage: React.FC = () => {
+  const { content } = useContent();
+  const publishedProjects = content.showcase.filter((p) => p.published);
+  const projectsToDisplay = publishedProjects.length > 0 ? publishedProjects : content.showcase;
+
   return (
     <div className="pt-16 min-h-screen bg-white">
       {/* Header Banner */}
@@ -42,7 +48,7 @@ export const ShowcasePage: React.FC = () => {
               Showcase Registry is Being Curated
             </h2>
             <p className="text-sm sm:text-base text-neutral-600 max-w-xl mx-auto leading-relaxed font-sans">
-              As Workbench rolls out its early developer preview builds, this showcase gallery will feature verified games, open-source technical prototypes, and studio titles.
+              As Workbench rolls out its early developer preview builds, this showcase gallery features verified games, open-source technical prototypes, and studio titles.
             </p>
           </div>
 
@@ -65,86 +71,67 @@ export const ShowcasePage: React.FC = () => {
           </div>
         </div>
 
-        {/* Structured Spotlight Template Preview */}
+        {/* Dynamic Project Spotlight Grid */}
         <section className="space-y-6">
           <div className="max-w-3xl">
             <div className="text-xs font-mono text-[#0e3052] uppercase tracking-wider font-semibold">
-              Gallery Architecture
+              Project Registry
             </div>
             <h3 className="text-2xl font-bold text-neutral-900 font-sans mt-1">
-              Project Card Specification
+              Featured Titles &amp; Blueprints
             </h3>
             <p className="text-xs text-neutral-600 font-sans">
-              How featured titles will be presented once submissions open.
+              Verified community and internal demonstration titles built with the Workbench runtime.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Template Card 1 */}
-            <div className="bg-white border border-neutral-200 rounded-lg p-6 flex flex-col justify-between space-y-6 shadow-xs">
-              <div className="space-y-3">
-                <div className="aspect-video rounded bg-neutral-100 border border-neutral-200 flex items-center justify-center text-xs font-mono text-neutral-500">
-                  <span>[2D Gameplay Preview Slot]</span>
+            {projectsToDisplay.map((proj) => (
+              <div
+                key={proj.id}
+                className="bg-white border border-neutral-200 rounded-lg p-6 flex flex-col justify-between space-y-6 shadow-xs hover:border-neutral-300 transition-colors"
+              >
+                <div className="space-y-3">
+                  <div className="aspect-video rounded bg-neutral-100 border border-neutral-200 flex items-center justify-center text-xs font-mono text-neutral-500">
+                    <span>{proj.previewSlotText || '[Gameplay Preview Slot]'}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] font-mono text-[#0e3052] font-semibold">
+                    <span>{proj.previewType}</span>
+                    <span className="text-neutral-500">{proj.scriptingLanguage}</span>
+                  </div>
+                  <h4 className="text-lg font-bold text-neutral-900 font-sans">
+                    {proj.name}
+                  </h4>
+                  <p className="text-xs text-neutral-600 leading-relaxed font-sans">
+                    {proj.description}
+                  </p>
+                  {proj.tags && proj.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 pt-1">
+                      {proj.tags.map((t, idx) => (
+                        <span key={idx} className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-600 border border-neutral-200">
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                <div className="flex items-center justify-between text-[11px] font-mono text-[#0e3052] font-semibold">
-                  <span>2D Pixel / Tilemap</span>
-                  <span className="text-neutral-500">.wbscript</span>
-                </div>
-                <h4 className="text-lg font-bold text-neutral-900 font-sans">
-                  Sample 2D Action Platformer
-                </h4>
-                <p className="text-xs text-neutral-600 leading-relaxed font-sans">
-                  High-speed platforming mechanics demonstrating Box2D sub-stepping, custom tilemap collisions, and animated sprite sheets.
-                </p>
-              </div>
-              <div className="pt-3 border-t border-neutral-100 text-[11px] font-mono text-neutral-400">
-                Slot Reserved for Creator Submission
-              </div>
-            </div>
 
-            {/* Template Card 2 */}
-            <div className="bg-white border border-neutral-200 rounded-lg p-6 flex flex-col justify-between space-y-6 shadow-xs">
-              <div className="space-y-3">
-                <div className="aspect-video rounded bg-neutral-100 border border-neutral-200 flex items-center justify-center text-xs font-mono text-neutral-500">
-                  <span>[3D PBR Gameplay Slot]</span>
+                <div className="pt-3 border-t border-neutral-100 flex items-center justify-between text-[11px] font-mono text-neutral-500">
+                  <span>Dev: {proj.developer}</span>
+                  {proj.externalUrl && (
+                    <a
+                      href={proj.externalUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#0e3052] hover:underline flex items-center gap-1"
+                    >
+                      <span>Link</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  )}
                 </div>
-                <div className="flex items-center justify-between text-[11px] font-mono text-[#0e3052] font-semibold">
-                  <span>3D PBR / Vulkan</span>
-                  <span className="text-neutral-500">Python + .wbvisual</span>
-                </div>
-                <h4 className="text-lg font-bold text-neutral-900 font-sans">
-                  Sample 3D Dungeon Crawler
-                </h4>
-                <p className="text-xs text-neutral-600 leading-relaxed font-sans">
-                  Metallic PBR materials, dynamic point lights, skeletal mesh skinning, and spatial audio reverb zones.
-                </p>
               </div>
-              <div className="pt-3 border-t border-neutral-100 text-[11px] font-mono text-neutral-400">
-                Slot Reserved for Creator Submission
-              </div>
-            </div>
-
-            {/* Template Card 3 */}
-            <div className="bg-white border border-neutral-200 rounded-lg p-6 flex flex-col justify-between space-y-6 shadow-xs">
-              <div className="space-y-3">
-                <div className="aspect-video rounded bg-neutral-100 border border-neutral-200 flex items-center justify-center text-xs font-mono text-neutral-500">
-                  <span>[Procedural AI Tech Demo Slot]</span>
-                </div>
-                <div className="flex items-center justify-between text-[11px] font-mono text-[#0e3052] font-semibold">
-                  <span>Simulation / Tool</span>
-                  <span className="text-neutral-500">Python 3.12</span>
-                </div>
-                <h4 className="text-lg font-bold text-neutral-900 font-sans">
-                  Procedural World Generator
-                </h4>
-                <p className="text-xs text-neutral-600 leading-relaxed font-sans">
-                  Algorithmic voxel and terrain generation leveraging Python 3.12 bindings and reusable scene instancing.
-                </p>
-              </div>
-              <div className="pt-3 border-t border-neutral-100 text-[11px] font-mono text-neutral-400">
-                Slot Reserved for Creator Submission
-              </div>
-            </div>
+            ))}
           </div>
         </section>
 

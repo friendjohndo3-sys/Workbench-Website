@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { WorkbenchLogo } from './WorkbenchLogo';
-import { Menu, X, Download, BookOpen, Layers, Sparkles, Newspaper, Grid } from 'lucide-react';
+import { Menu, X, Download } from 'lucide-react';
+import { useContent } from '../context/ContentContext';
 
 export const Header: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const { content } = useContent();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -21,13 +23,7 @@ export const Header: React.FC = () => {
     setMobileMenuOpen(false);
   }, [location.pathname]);
 
-  const navItems = [
-    { name: 'Features', path: '/features' },
-    { name: 'Docs', path: '/docs' },
-    { name: 'Download', path: '/download' },
-    { name: 'Showcase', path: '/showcase' },
-    { name: 'Updates', path: '/updates' },
-  ];
+  const navItems = content.navigation.filter((item) => item.visible);
 
   return (
     <header
@@ -75,7 +71,7 @@ export const Header: React.FC = () => {
           
           <div className="flex flex-col">
             <span className="text-xl font-bold tracking-tight text-white group-hover:text-sky-200 transition-colors font-sans">
-              Workbench
+              {content.branding.siteTitle || 'Workbench'}
             </span>
           </div>
         </Link>

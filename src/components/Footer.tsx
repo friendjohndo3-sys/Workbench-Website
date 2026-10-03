@@ -1,9 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { WorkbenchLogo } from './WorkbenchLogo';
-import { ArrowUp, BookOpen, Download, Terminal, Layers, Code2, Newspaper, Grid, Shield } from 'lucide-react';
+import { ArrowUp, BookOpen, Download, Terminal, Code2, Newspaper, Grid, Shield, Lock } from 'lucide-react';
+import { useContent } from '../context/ContentContext';
 
 export const Footer: React.FC = () => {
+  const { content } = useContent();
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -17,17 +20,17 @@ export const Footer: React.FC = () => {
             <Link to="/" className="inline-flex items-center gap-3 group">
               <WorkbenchLogo size="sm" className="w-8 h-8 rounded" />
               <span className="text-xl font-bold tracking-tight text-neutral-900 group-hover:text-[#0e3052] transition-colors font-sans">
-                Workbench
+                {content.branding.siteTitle || 'Workbench'}
               </span>
             </Link>
             <p className="text-sm font-semibold text-neutral-800 font-sans">
-              Build. Create. Play.
+              {content.branding.tagline || 'Build. Create. Play.'}
             </p>
             <p className="text-neutral-600 font-sans text-xs max-w-sm leading-relaxed">
-              A standalone 2D + 3D game engine for desktop and mobile development, powered by Python, .wbscript, and .wbvisual.
+              {content.footer.description}
             </p>
             <div className="pt-1 text-neutral-500 font-sans text-xs">
-              Made with care by PrismInk.
+              {content.footer.companyCredit}
             </div>
           </div>
 
@@ -97,7 +100,7 @@ export const Footer: React.FC = () => {
             </ul>
           </div>
 
-          {/* Col 5: Releases & Showcase */}
+          {/* Col 5: Releases, Media & Dev Access */}
           <div className="space-y-3">
             <div className="text-neutral-900 font-semibold uppercase tracking-wider text-[11px] font-sans">
               Releases &amp; Media
@@ -127,8 +130,14 @@ export const Footer: React.FC = () => {
                   <span>Legal &amp; Stability</span>
                 </Link>
               </li>
+              <li>
+                <Link to="/dev" className="hover:text-[#0e3052] transition-colors flex items-center gap-1.5 text-neutral-500 font-mono text-[11px]">
+                  <Lock className="w-3 h-3 text-neutral-400" />
+                  <span>Developer Panel</span>
+                </Link>
+              </li>
               <li className="text-neutral-400 pt-2 font-mono text-[11px]">
-                Build: v1.0.0-prototype
+                Build: v{content.settings.currentEngineVersion || '1.0.0-prototype'}
               </li>
             </ul>
           </div>
@@ -137,7 +146,7 @@ export const Footer: React.FC = () => {
         {/* Bottom Bar: Copyright & Back to Top */}
         <div className="pt-8 border-t border-neutral-200 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="text-neutral-500 font-sans flex items-center gap-4">
-            <span>&copy; 2026 PrismInk. All rights reserved.</span>
+            <span>{content.footer.copyrightText || '© 2026 PrismInk. All rights reserved.'}</span>
             <span className="text-neutral-300">|</span>
             <Link to="/legal" className="hover:text-neutral-800 transition-colors">
               Privacy &amp; Terms
