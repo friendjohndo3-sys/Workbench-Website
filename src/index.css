@@ -1,0 +1,126 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+@layer base {
+  html, body {
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #ffffff;
+    color: #171717;
+  }
+  
+  code, pre, .font-mono {
+    font-family: 'JetBrains Mono', monospace !important;
+  }
+
+  .font-sans {
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  }
+}
+
+/* Blueprint drafting grid styles for light mode */
+.blueprint-grid {
+  background-size: 24px 24px;
+  background-image: 
+    linear-gradient(to right, rgba(14, 48, 82, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(14, 48, 82, 0.04) 1px, transparent 1px);
+}
+
+.blueprint-grid-dense {
+  background-size: 12px 12px;
+  background-image: 
+    linear-gradient(to right, rgba(14, 48, 82, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(14, 48, 82, 0.05) 1px, transparent 1px);
+}
+
+.blueprint-paper-bg {
+  background-color: #0b2138;
+  background-image: 
+    radial-gradient(circle at 50% 50%, rgba(20, 60, 100, 0.4) 0%, rgba(8, 24, 44, 0.95) 100%),
+    linear-gradient(to right, rgba(96, 165, 250, 0.12) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(96, 165, 250, 0.12) 1px, transparent 1px);
+  background-size: 100% 100%, 20px 20px, 20px 20px;
+}
+
+/* Blueprint Header Panel Aesthetic */
+.blueprint-header {
+  background-color: #0b2138;
+  background-image: 
+    linear-gradient(to right, rgba(147, 197, 253, 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(147, 197, 253, 0.07) 1px, transparent 1px);
+  background-size: 16px 16px;
+  border-bottom: 1px solid #1e4b7a;
+}
+
+/* Technical blueprint button design */
+.btn-blueprint {
+  position: relative;
+  border-radius: 0.375rem;
+  background-color: #0e3052;
+  background-image: linear-gradient(rgba(14, 48, 82, 0.92), rgba(14, 48, 82, 0.92)), url('/textures/buttontexture.jpeg');
+  background-blend-mode: multiply;
+  background-size: cover;
+  border: 1px solid #1e4b7a;
+  color: #ffffff;
+  overflow: hidden;
+  font-weight: 600;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-blueprint::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 8px 8px;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.btn-blueprint:hover {
+  background-color: #143e69;
+  background-image: linear-gradient(rgba(20, 62, 105, 0.92), rgba(20, 62, 105, 0.92)), url('/textures/buttontexture.jpeg');
+  border-color: #2b6cb0;
+  box-shadow: 0 2px 8px rgba(14, 48, 82, 0.25);
+}
+
+.btn-blueprint-secondary {
+  position: relative;
+  border-radius: 0.375rem;
+  background-color: #ffffff;
+  border: 1px solid #d4d4d8;
+  color: #18181b;
+  font-weight: 600;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-blueprint-secondary:hover {
+  background-color: #f4f4f5;
+  border-color: #a1a1aa;
+  color: #09090b;
+}
+
+/* Light mode technical scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f4f4f5;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d4d4d8;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a1aa;
+}

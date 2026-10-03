@@ -1,0 +1,6 @@
+{
+  "name": "Workbench",
+  "description": "Workbench is a standalone 2D + 3D game engine for desktop and mobile development by PrismInk.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
