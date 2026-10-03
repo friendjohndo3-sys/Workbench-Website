@@ -87,16 +87,6 @@ export const HomePage: React.FC = () => {
 
           {/* Main Hero Display Banner (1791001622925.jpg) */}
           <div className="mt-12 lg:mt-16 max-w-5xl mx-auto">
-            <div className="mb-3 flex items-center justify-between px-2 text-xs font-mono text-neutral-500">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#0e3052]" />
-                <span className="font-sans font-medium text-neutral-700">Official Brand Display</span>
-              </div>
-              <span className="text-neutral-400 font-mono text-[11px]">
-                Blueprint Architecture · 2D + 3D
-              </span>
-            </div>
-
             <div className="relative rounded-lg overflow-hidden border border-neutral-300 shadow-sm bg-neutral-900">
               <img
                 src={WORKBENCH_ASSETS.HERO_DISPLAY}
